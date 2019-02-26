@@ -9,6 +9,8 @@ verify_ssl = true
 flask = "*"
 python-dotenv = "*"
 faker = "*"
+bootstrap-flask = "*"
+flask-sqlalchemy = "*"
 
 [requires]
 python_version = "3.6"
