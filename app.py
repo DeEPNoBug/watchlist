@@ -16,19 +16,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-app = Flask(__name__)
 
-WIN = sys.platform.startswith('win')
-if WIN:  # 如果是windows系统，使用三个斜线
-    prefix = 'sqlite:///'
-else:
-    prefix = 'sqlite:////'
-
-app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-login_manger = LoginManager(app)
 
 
 @app.cli.command()  # 注册为命令
