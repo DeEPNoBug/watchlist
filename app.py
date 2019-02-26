@@ -13,6 +13,7 @@ import click
 
 from flask import Flask, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -69,9 +70,46 @@ def forge():
     click.echo('Done.')
 
 
+@app.context_processor
+def inject_user():  # 函数名可以随意修改
+    user = User.query.first()
+    return dict(user=user)
+
+
+@app.cli.command()
+@click.option('--username', prompt=True, help='The username used to login')
+@click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help="The password used to login.")
+def admin(username, password):
+    """Create user."""
+    db.create_all()
+
+    user = User.query.first()
+    if user is not None:
+        click.echo("Updating user...")
+        user.username = username
+        user.set_password(password)  # 设置密码
+
+    else:
+        click.echo("Create user...")
+        user = User(username=username, name="Admin")
+        user.set_password(password)
+        db.session.add(user)
+
+    db.session.commit()  # 提交数据库会话
+    click.echo('Done...')
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20))  # 名字
+    username = db.Column(db.String(20))
+    password_hash = db.Column(db.String(128))
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def validate_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 class Movie(db.Model):
@@ -117,6 +155,12 @@ def test_url_for():
     print(url_for('test_url_for'))
     print(url_for('test_url_for', num=2))
     return "Test page"
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    user = User.query.first()
+    return render_template('404.html', user=user), 404
 
 
 if __name__ == '__main__':

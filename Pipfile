@@ -11,6 +11,8 @@ python-dotenv = "*"
 faker = "*"
 bootstrap-flask = "*"
 flask-sqlalchemy = "*"
+flask-wtf = "*"
+flask-login = "*"
 
 [requires]
 python_version = "3.6"
