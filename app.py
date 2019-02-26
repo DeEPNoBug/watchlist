@@ -198,6 +198,16 @@ def load_user(user_id):
     return user
 
 
+@app.route('/movie/delete/<int:movie_id>', methods=['POST'])
+@login_required
+def delete(movie_id):
+    movie = Movie.query.get_or_404(movie_id)
+    db.session.delete(movie)
+    db.session.commit()
+    flash("Item deleted.")
+    return redirect(url_for('index'))
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     user = User.query.first()
@@ -206,3 +216,11 @@ def page_not_found(e):
 
 if __name__ == '__main__':
     app.run(debug=True)
+    """
+    在视图保护层面来说，未登录用户不能执行下面的操作：
+    访问编辑页面
+    访问设置页面
+    执行注销操作
+    执行删除操作
+    执行添加新条目操作
+    """
