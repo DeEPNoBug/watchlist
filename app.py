@@ -11,7 +11,8 @@ import os
 import sys
 import click
 
-from flask import Flask, url_for, render_template
+from flask import Flask, url_for, render_template, request, flash, redirect
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -26,6 +27,8 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+login_manger = LoginManager(app)
 
 
 @app.cli.command()  # 注册为命令
@@ -99,7 +102,7 @@ def admin(username, password):
     click.echo('Done...')
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20))  # 名字
     username = db.Column(db.String(20))
@@ -155,6 +158,44 @@ def test_url_for():
     print(url_for('test_url_for'))
     print(url_for('test_url_for', num=2))
     return "Test page"
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():  # 登录
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if not username or not password:
+            flash('Invalid input')
+            return redirect(url_for('login'))
+
+        user = User.query.first()
+        # 验证用户名和密码是否一致
+        if username == user.username and user.validate_password(password):
+            login_user(user)  # 更如用户
+            flash('Login sucess')
+            return redirect(url_for('index'))
+
+        flash('Invalid username or password')
+        return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()  # 登出用户
+    flash('Goodbye.')
+    return redirect(url_for('index'))  # 重定向回首页
+
+
+@login_manger.user_loader
+def load_user(user_id):
+    # 创建用户加载回调函数，接受用户ID作为参数
+    user = User.query.get(int(user_id))
+    return user
 
 
 @app.errorhandler(404)
