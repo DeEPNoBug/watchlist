@@ -214,6 +214,12 @@ def page_not_found(e):
     return render_template('404.html', user=user), 404
 
 
+def say_hello(to=None):
+    if to:
+        return "Hello, %s!" % to
+    return "Hello!"
+
+
 if __name__ == '__main__':
     app.run(debug=True)
     """
