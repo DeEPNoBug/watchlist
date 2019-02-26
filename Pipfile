@@ -1,7 +1,7 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
+name = "pypi"
 
 [dev-packages]
 coverage = "*"
@@ -9,11 +9,5 @@ coverage = "*"
 [packages]
 flask = "*"
 python-dotenv = "*"
-faker = "*"
-bootstrap-flask = "*"
 flask-sqlalchemy = "*"
-flask-wtf = "*"
 flask-login = "*"
-
-[requires]
-python_version = "3.6"

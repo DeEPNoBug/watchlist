@@ -1,27 +1,25 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import os
 import sys
 
 from flask import Flask
-from flask_login import LoginManager, login_manager
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
-app = Flask(__name__)
-from watchlist import app, db
-from watchlist.models import User, Movie
-
+# SQLite URI compatible
 WIN = sys.platform.startswith('win')
-if WIN:  # 如果是windows系统，使用三个斜线
+if WIN:
     prefix = 'sqlite:///'
 else:
     prefix = 'sqlite:////'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev')
+app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(os.path.dirname(app.root_path), os.getenv('DATABASE_FILE', 'data.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
-login_manger = LoginManager(app)
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
 
 
 @login_manager.user_loader
@@ -32,6 +30,7 @@ def load_user(user_id):
 
 
 login_manager.login_view = 'login'
+# login_manager.login_message = 'Your custom message'
 
 
 @app.context_processor
